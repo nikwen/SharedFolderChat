@@ -1,6 +1,3 @@
-*.jar
-*.war
-*.ear
 *.class
 
 *.pydevproject
