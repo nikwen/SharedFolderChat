@@ -88,7 +88,7 @@ public class AboutDialog extends JDialog {
 		lblReleasedUnderThe.setCursor(new Cursor(Cursor.HAND_CURSOR));
 		getContentPane().add(lblReleasedUnderThe, "cell 7 4");
 		
-		JLabel lblSourceCodeAvailable = new JLabel("<html>Source Code available at <a href=\"https://github.com/nikwen/SharedFolderChat\">github.com</a></html>");
+		JLabel lblSourceCodeAvailable = new JLabel("<html>Source Code available at <br><a href=\"https://github.com/nikwen/SharedFolderChat\">github.com</a></html>");
 		lblSourceCodeAvailable.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent event) {
