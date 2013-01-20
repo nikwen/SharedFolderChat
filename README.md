@@ -1,5 +1,5 @@
-Shared Folder Chat Readme:
-==========================
+Shared Folder Chat:
+===================
 
 Copyright (C) 2013  Niklas Wenzel <nikwen.developer@gmail.com>
 
