@@ -20,6 +20,7 @@
 
 package de.wenzel.niklas.sharedfolderchat;
 
+import java.awt.Cursor;
 import java.awt.Insets;
 import java.awt.Point;
 import java.awt.Toolkit;
@@ -63,6 +64,7 @@ public class Notification extends JFrame {
 		setUndecorated(true);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setAlwaysOnTop(true);
+		setCursor(Cursor.getPredefinedCursor(Cursor.MOVE_CURSOR));
 		
 		contentPane = new JPanel();
 		contentPane.setBorder(new TitledBorder(UIManager.getBorder("TitledBorder.border"), "", TitledBorder.LEADING, TitledBorder.TOP, null, new Color(0, 0, 0)));
@@ -81,12 +83,12 @@ public class Notification extends JFrame {
 		lblText.setWrapStyleWord(true);
 		lblText.setBackground(Color.YELLOW);
 		lblText.setFont(new Font("Tahoma", Font.BOLD, 12));
+		lblText.setCursor(Cursor.getPredefinedCursor(Cursor.TEXT_CURSOR));
 		contentPane.add(lblText, "cell 0 1,growx,aligny top");
 		
 		addMouseListener(new MouseAdapter() {
 	        public void mousePressed(MouseEvent e) {
 	            firstClick = e.getPoint();
-//	            getComponentAt(firstClick);
 	        }
 	    });
 
@@ -121,10 +123,12 @@ public class Notification extends JFrame {
 		
 
 	public void setNotificationText(String name, String message) {
+		setFocusableWindowState(false);
 		setVisible(true);
 		lblText.setText(message);
 		lblName.setText(name.concat(" wrote:"));
 		closeTime = System.currentTimeMillis() + 4000;
+		setFocusableWindowState(true);
 	}
 
 }

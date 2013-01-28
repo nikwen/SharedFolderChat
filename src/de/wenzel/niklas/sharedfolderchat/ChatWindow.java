@@ -22,6 +22,7 @@ package de.wenzel.niklas.sharedfolderchat;
 
 import java.awt.Dimension;
 import java.awt.EventQueue;
+import javax.imageio.ImageIO;
 import javax.swing.DefaultListModel;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -60,6 +61,7 @@ import javax.swing.event.PopupMenuListener;
 import javax.swing.event.PopupMenuEvent;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
+import javax.swing.JSeparator;
 
 public class ChatWindow {
 
@@ -75,6 +77,7 @@ public class ChatWindow {
 	protected static boolean showAboutDialogAtStart;
 	private boolean usernamePrompted = false;
 	protected boolean notificationsOn = true;
+	private String iconPath = "default";
 	
 	private Timer timer;
 	UpdateTask task;
@@ -101,7 +104,13 @@ public class ChatWindow {
 	private JMenuItem menuItemToggleNotifications;
 	private JMenuItem mntmRefresh;
 	private JMenuItem mntmSetUpdatingTime;
-
+	private JPopupMenu popupMenu_2;
+	private JMenuItem mntmSetWindowTitle;
+	private JMenuItem mntmSetWindowIcon;
+	private JMenuItem mntmSetDefaultIcon;
+	private JSeparator separator;
+	private JMenuItem mntmSetDefaultTitle;
+	
 	
 	public static void main(String[] args) {
 		EventQueue.invokeLater(new Runnable() {
@@ -129,20 +138,78 @@ public class ChatWindow {
 		frmChat.addKeyListener(new KeyAdapter() {
 			@Override
 			public void keyPressed(KeyEvent event) {
-				JOptionPane.showMessageDialog(null, "Nothing is selected!", "Error", JOptionPane.ERROR_MESSAGE);
+				JOptionPane.showMessageDialog(frmChat, "Nothing is selected!", "Error", JOptionPane.ERROR_MESSAGE);
 				if (event.getKeyCode() == KeyEvent.VK_COPY) {
 					msgList.getTransferHandler().exportToClipboard(msgList, Toolkit.getDefaultToolkit().getSystemClipboard(), TransferHandler.COPY);
 				}
 			}
 		});
 		frmChat.setIconImage(Toolkit.getDefaultToolkit().getImage(ChatWindow.class.getResource("/de/wenzel/niklas/sharedfolderchat/icon1.png")));
-		frmChat.setTitle("School Chat Room");
+		frmChat.setTitle("Shared Folder Chat");
 		frmChat.setBounds(100, 100, 530, 400);
 		frmChat.setMinimumSize(new Dimension(465, 300));
 		frmChat.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		
+		popupMenu_2 = new JPopupMenu();
+		addPopup(frmChat.getContentPane(), popupMenu_2);
+		
+		mntmSetWindowTitle = new JMenuItem("Set window title");
+		mntmSetWindowTitle.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				String title = JOptionPane.showInputDialog(frmChat, "Please enter the new title.", frmChat.getTitle());
+				if (title != null) {
+					frmChat.setTitle(title);
+					saveSettings();
+				}
+			}
+		});
+		popupMenu_2.add(mntmSetWindowTitle);
+		
+		mntmSetWindowIcon = new JMenuItem("Set window icon");
+		mntmSetWindowIcon.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				fc.setFileSelectionMode(JFileChooser.FILES_ONLY);
+				fc.setAcceptAllFileFilterUsed(true);
+				fc.setDialogTitle("Select the new icon.");
+				int returnVal = fc.showOpenDialog(frmChat);
+				
+				if (returnVal == JFileChooser.APPROVE_OPTION) {
+					try {
+						frmChat.setIconImage(ImageIO.read(fc.getSelectedFile()));
+						iconPath = fc.getSelectedFile().getAbsolutePath();
+						saveSettings();
+					} catch (Exception e1) {
+						JOptionPane.showMessageDialog(frmChat, "Error loading the image!", "Error", JOptionPane.ERROR_MESSAGE);
+						e1.printStackTrace();
+					}
+				}
+			}
+		});
+		popupMenu_2.add(mntmSetWindowIcon);
+		
+		separator = new JSeparator();
+		popupMenu_2.add(separator);
+		
+		mntmSetDefaultTitle = new JMenuItem("Set to default title");
+		mntmSetDefaultTitle.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				frmChat.setTitle("Shared Folder Chat");
+				saveSettings();
+			}
+		});
+		popupMenu_2.add(mntmSetDefaultTitle);
+		
+		mntmSetDefaultIcon = new JMenuItem("Set to default icon");
+		mntmSetDefaultIcon.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				frmChat.setIconImage(Toolkit.getDefaultToolkit().getImage(ChatWindow.class.getResource("/de/wenzel/niklas/sharedfolderchat/icon1.png")));
+				iconPath = "default";
+				saveSettings();
+			}
+		});
+		popupMenu_2.add(mntmSetDefaultIcon);
+		
 		frmChat.getContentPane().setLayout(new MigLayout("", "[:82.00px:108.00px,grow][grow]", "[][grow][]"));
-		
-		
 		
 		chatsList = new JList(chatsListModel);
 		chatsList.setToolTipText("<html> List of all entered chats. <br> Right click to enable/disable notifications or to change the updating time. </html>");
@@ -157,9 +224,8 @@ public class ChatWindow {
 		});
 		
 		btnAbout = new JButton("About");
-		btnAbout.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseClicked(MouseEvent event) {
+		btnAbout.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
 				AboutDialog aboutDialog = new AboutDialog(frmChat);
 				aboutDialog.setVisible(true);
 			}
@@ -225,12 +291,12 @@ public class ChatWindow {
 								pw.close();
 							}
 						} else {
-							JOptionPane.showMessageDialog(null, "Select a file with a \".txt\"-extension!", "Error", JOptionPane.ERROR_MESSAGE);
+							JOptionPane.showMessageDialog(frmChat, "Select a file with a \".txt\"-extension!", "Error", JOptionPane.ERROR_MESSAGE);
 							actionPerformed(event);
 						}
 					}
 				} else {
-					JOptionPane.showMessageDialog(null, "Nothing is selected!", "Error", JOptionPane.ERROR_MESSAGE);
+					JOptionPane.showMessageDialog(frmChat, "Nothing is selected!", "Error", JOptionPane.ERROR_MESSAGE);
 				}
 			}
 		});
@@ -250,7 +316,7 @@ public class ChatWindow {
 				if (msgList.getSelectedIndices().length > 0) {
 					msgList.getTransferHandler().exportToClipboard(msgList, Toolkit.getDefaultToolkit().getSystemClipboard(), TransferHandler.COPY);
 				} else {
-					JOptionPane.showMessageDialog(null, "Nothing is selected!", "Error", JOptionPane.ERROR_MESSAGE);
+					JOptionPane.showMessageDialog(frmChat, "Nothing is selected!", "Error", JOptionPane.ERROR_MESSAGE);
 				}
 				
 			}
@@ -314,11 +380,11 @@ public class ChatWindow {
 					if (chatDir.get(selectedChatIndex).exists() && chatDir.get(selectedChatIndex).isDirectory()) {
 						if (!message.isEmpty()) {
 							if (usernameText.getText().equals(USERNAME) && !usernamePrompted) {
-								JOptionPane.showMessageDialog(null, "Please change your username!", "Warning", JOptionPane.WARNING_MESSAGE);
+								JOptionPane.showMessageDialog(frmChat, "Please change your username!", "Warning", JOptionPane.WARNING_MESSAGE);
 								usernamePrompted = true;
 								return;
 							} else if (usernameText.getText().isEmpty()) {
-								JOptionPane.showMessageDialog(null, "Please enter a username!", "Warning", JOptionPane.ERROR_MESSAGE);
+								JOptionPane.showMessageDialog(frmChat, "Please enter a username!", "Warning", JOptionPane.ERROR_MESSAGE);
 								return;
 							}
 							File msgFile = new File(chatDir.get(selectedChatIndex), String.valueOf(System.currentTimeMillis()).concat(MSG_SUFFIX));
@@ -348,6 +414,8 @@ public class ChatWindow {
 								}
 							}
 							task.run();
+								
+							hideFile(msgFile);
 						}
 					} else {
 						chatDir.remove(selectedChatIndex);
@@ -355,7 +423,7 @@ public class ChatWindow {
 					}
 					
 				} else {
-					JOptionPane.showMessageDialog(null, "Select a chat.", "Error", JOptionPane.ERROR_MESSAGE);
+					JOptionPane.showMessageDialog(frmChat, "Select a chat.", "Error", JOptionPane.ERROR_MESSAGE);
 				}
 			}
 		});
@@ -382,9 +450,8 @@ public class ChatWindow {
 		msgText.setColumns(10);
 		
 		btnNewChat = new JButton("Create a new chat");
-		btnNewChat.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseClicked(MouseEvent e) {
+		btnNewChat.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
 				fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 				fc.setDialogTitle("Select the parent directory where to create a new chat");
 				int returnVal = fc.showOpenDialog(btnEnterAChat.getParent());
@@ -393,11 +460,12 @@ public class ChatWindow {
 					File newChat = new File(fc.getSelectedFile(), CHAT_DIR_NAME);
 					if (!newChat.exists() && !newChat.isDirectory()) {
 						newChat.mkdir();
+						hideFile(newChat);
 						chatDir.add(newChat);
 						updateChatsList();
 						chatsList.setSelectedIndex(chatsListModel.getSize()-1);
 					} else {
-						JOptionPane.showMessageDialog(null, "There is already a directory named \"".concat(CHAT_DIR_NAME).concat("\"! (Every chat directory has to be named \"").concat(CHAT_DIR_NAME).concat("\".)"), "Error: Failed to create a new chat", JOptionPane.ERROR_MESSAGE);
+						JOptionPane.showMessageDialog(frmChat, "There is already a directory named \"".concat(CHAT_DIR_NAME).concat("\"! (Every chat directory has to be named \"").concat(CHAT_DIR_NAME).concat("\".)"), "Error: Failed to create a new chat", JOptionPane.ERROR_MESSAGE);
 					}
 					
 				}
@@ -406,9 +474,8 @@ public class ChatWindow {
 		frmChat.getContentPane().add(btnNewChat, "flowx,cell 0 0");
 		
 		btnLeaveTheChat = new JButton("Leave the chat");
-		btnLeaveTheChat.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseClicked(MouseEvent event) {
+		btnLeaveTheChat.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
 				int selectedIndex = chatsList.getSelectedIndex();
 				if (selectedIndex >= 0) {
 					chatDir.remove(selectedIndex);
@@ -417,15 +484,16 @@ public class ChatWindow {
 					if ((chatsList.getSelectedIndex() < 0) && (chatsListModel.getSize() > 0)) {
 						chatsList.setSelectedIndex(0);
 					}
+				} else {
+					JOptionPane.showMessageDialog(frmChat, "No chat has been selected!", "Error", JOptionPane.ERROR_MESSAGE);
 				}
 			}
 		});
 		frmChat.getContentPane().add(btnLeaveTheChat, "cell 0 0");
 		
 		btnEnterAChat = new JButton("Enter a chat");
-		btnEnterAChat.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseClicked(MouseEvent arg0) {
+		btnEnterAChat.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
 				FileNameExtensionFilter chatFilter = new FileNameExtensionFilter("Chat (.chat)", "CHAT");
 				fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 				fc.setAcceptAllFileFilterUsed(false);
@@ -447,7 +515,7 @@ public class ChatWindow {
 							chatsList.setSelectedIndex(chatDir.indexOf(newChat));
 						}
 					} else {
-						JOptionPane.showMessageDialog(null, "A chat directory has to be named \"".concat(CHAT_DIR_NAME).concat("\"!"), "Error", JOptionPane.ERROR_MESSAGE);
+						JOptionPane.showMessageDialog(frmChat, "A chat directory has to be named \"".concat(CHAT_DIR_NAME).concat("\"!"), "Error", JOptionPane.ERROR_MESSAGE);
 					}
 				}
 			}
@@ -457,11 +525,22 @@ public class ChatWindow {
 		timer = new Timer();
 		task = new UpdateTask();
 
+		boolean initialize = true;
 		File settingsFile = new File(System.getProperty("user.home"), SETTINGS_FILE_NAME);
 		if (settingsFile.exists() && settingsFile.isFile()) {
 			BufferedReader in = null;
 			try {
 				in = new BufferedReader(new FileReader(settingsFile));
+				frmChat.setTitle(in.readLine());
+				iconPath = in.readLine();
+				if (!iconPath.equals("default")) {
+					try {
+						frmChat.setIconImage(ImageIO.read(new File(iconPath)));
+					} catch (Exception e) {
+						e.printStackTrace();
+						JOptionPane.showMessageDialog(frmChat, "There was a problem loading the window icon.", "Error", JOptionPane.ERROR_MESSAGE);
+					}
+				}
 				notificationsOn = Boolean.parseBoolean(in.readLine());
 				task.updatingTime = Integer.parseInt(in.readLine());
 				usernameText.setText(in.readLine());
@@ -476,7 +555,9 @@ public class ChatWindow {
 					
 				}
 				updateChatsList();
+				initialize = false;
 			} catch (Exception e) {
+				settingsFile.delete();
 				e.printStackTrace();
 			} finally {
 				try {
@@ -485,7 +566,8 @@ public class ChatWindow {
 					e.printStackTrace();
 				}
 			}
-		} else {
+		}
+		if (initialize) {
 			showAboutDialogAtStart = true;
 			usernameText.setText(JOptionPane.showInputDialog(frmChat, "Please enter your username!", System.getProperty("user.name")));
 			if (!usernameText.getText().isEmpty()) {
@@ -507,10 +589,10 @@ public class ChatWindow {
 					setNewUpdateTime(timeInt);
 					return;
 				} else {
-					JOptionPane.showMessageDialog(null, "The updating time has to be a value between 100 and 3600000 milliseconds.", "Error", JOptionPane.ERROR_MESSAGE);
+					JOptionPane.showMessageDialog(frmChat, "The updating time has to be a value between 100 and 3600000 milliseconds.", "Error", JOptionPane.ERROR_MESSAGE);
 				}
 			} catch (NumberFormatException e) {
-				JOptionPane.showMessageDialog(null, "Please enter a valid updating time.", "Error", JOptionPane.ERROR_MESSAGE);
+				JOptionPane.showMessageDialog(frmChat, "Please enter a valid updating time.", "Error", JOptionPane.ERROR_MESSAGE);
 			}
 			askForNewUpdateTime();
 		}
@@ -574,6 +656,8 @@ public class ChatWindow {
 		try {
 			fw = new FileWriter(settingsFile, false);
 			pw = new PrintWriter(fw);
+			pw.println(frmChat.getTitle());
+			pw.println(iconPath);
 			pw.println(notificationsOn);
 			pw.println(task.updatingTime);
 			pw.println(usernameText.getText());
@@ -597,6 +681,18 @@ public class ChatWindow {
 		
 	}
 	
+
+	public static void hideFile(File f) {
+		try {
+			Process p = Runtime.getRuntime().exec("attrib +h " + f.getPath());
+			p.waitFor();
+		} catch (IOException e1) {
+			e1.printStackTrace();
+		} catch (InterruptedException e1) {
+			e1.printStackTrace();
+		}
+	}
+	
 	public class UpdateTask extends TimerTask {
 		private TimeComparator timeComparator = new TimeComparator();
 		int updatingTime = 500;
@@ -609,6 +705,7 @@ public class ChatWindow {
 		public UpdateTask() {
 			super();
 		}
+		
 
 		public void run() {
 			if (chatsList.getSelectedIndex() != -1) {
@@ -632,7 +729,7 @@ public class ChatWindow {
 					                    }
 					                });
 									
-									if (notificationsOn && (savedLength != 0) && (!message.startsWith("<".concat(usernameText.getText())))) {
+									if (notificationsOn && (savedLength != 0) && (!name.equals(usernameText.getText()))) {
 										notification.setNotificationText(name, text);
 									}
 								} catch (IOException e) {
@@ -664,7 +761,7 @@ public class ChatWindow {
 				} else {
 					chatDir.remove(selectedChatIndex);
 					updateChatsList();
-					JOptionPane.showMessageDialog(null, "This chat does not exist any more. Someone has deleted the directory.", "Error", JOptionPane.ERROR_MESSAGE);
+					JOptionPane.showMessageDialog(frmChat, "This chat does not exist any more. Someone has deleted the directory.", "Error", JOptionPane.ERROR_MESSAGE);
 				}
 			}
 	    	

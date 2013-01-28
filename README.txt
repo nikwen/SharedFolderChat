@@ -3,7 +3,7 @@ Shared Folder Chat Readme:
 
 Copyright (C) 2013  Niklas Wenzel <nikwen.developer@gmail.com>
 
-Version: 1.0
+Version: 1.1
 
 About the software:
 ===================
@@ -36,6 +36,8 @@ chat. You can enable/disable notifications in the context menu of the chat list.
 
 To change the program's updating time right click on the chat list and select "Set 
 updating time".
+
+You can change the window's title and icon by opening the context menu at any free space of the window.
 
 
 System requirements:

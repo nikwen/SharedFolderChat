@@ -64,7 +64,7 @@ public class AboutDialog extends JDialog {
 		JLabel lblProgrammedByNiklas = new JLabel("Copyright 2013 Niklas Wenzel");
 		getContentPane().add(lblProgrammedByNiklas, "cell 7 2");
 		
-		JLabel lblNewLabel = new JLabel("Version 1.0");
+		JLabel lblNewLabel = new JLabel("Version 1.1");
 		getContentPane().add(lblNewLabel, "cell 7 3");
 		
 		JLabel lblReleasedUnderThe = new JLabel("<html>Released under the <a href=\"http://www.gnu.org/licenses/gpl.html\">GPL V3.</a></html>");
