@@ -52,7 +52,7 @@ public class AboutDialog extends JDialog {
 		super.setLocationRelativeTo(parent);
 		getContentPane().setLayout(new MigLayout("", "[][29.00][][35][16.00][35][10.00][grow]", "[][11.00][35.00][35.00][35.00][35.00][:35.00:35.00][35.0,grow][]"));
 		
-		JLabel lblAbout = new JLabel("School Chat Room");
+		JLabel lblAbout = new JLabel("Shared Folder Chat");
 		lblAbout.setFont(new Font("Tahoma", Font.PLAIN, 18));
 		getContentPane().add(lblAbout, "cell 0 0 8 1,alignx center");
 		
